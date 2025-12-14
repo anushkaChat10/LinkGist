@@ -50,48 +50,101 @@
     chrome.runtime.sendMessage({ action: "summarize_url_hover", url, tabId: tab }, (resp) => {
       if (!resp) return;
       if (resp.ok && resp.summary) {
-        showTooltip(event, resp.summary);
+        showTooltip(event, resp.summary, resp.cached);
       } else if (resp && resp.error) {
-        showTooltip(event, "Error: " + resp.error);
+        showTooltip(event, "Error: " + resp.error, false);
       } else {
-        showTooltip(event, "(no summary)");
+        showTooltip(event, "(no summary)", false);
       }
     });
   }
 
   // Show tooltip near cursor using a floating div
-  function showTooltip(mouseEvent, text) {
+  function showTooltip(mouseEvent, text, isCached = false) {
     removeTooltip();
     tooltipEl = document.createElement("div");
     tooltipEl.className = "linkgist-tooltip";
     tooltipEl.style.position = "fixed";
     tooltipEl.style.zIndex = 2147483647;
-    tooltipEl.style.maxWidth = "420px";
+    tooltipEl.style.maxWidth = "440px";
+    tooltipEl.style.minWidth = "280px";
     tooltipEl.style.whiteSpace = "normal";
-    tooltipEl.style.padding = "10px";
-    tooltipEl.style.borderRadius = "8px";
-    tooltipEl.style.boxShadow = "0 6px 18px rgba(0,0,0,0.2)";
-    tooltipEl.style.background = "linear-gradient(180deg, #ffffff, #f6f9ff)";
-    tooltipEl.style.color = "#111";
-    tooltipEl.style.fontSize = "13px";
-    tooltipEl.style.lineHeight = "1.4";
-    tooltipEl.style.fontFamily = "Segoe UI, Roboto, Arial, sans-serif";
-    tooltipEl.style.border = "1px solid rgba(0,0,0,0.06)";
+    tooltipEl.style.padding = "16px 18px";
+    tooltipEl.style.borderRadius = "12px";
+    tooltipEl.style.boxShadow = "0 12px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)";
+    tooltipEl.style.background = "linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 41, 59, 0.98) 100%)";
+    tooltipEl.style.backdropFilter = "blur(12px)";
+    tooltipEl.style.color = "#cbd5e1";
+    tooltipEl.style.fontSize = "14px";
+    tooltipEl.style.lineHeight = "1.6";
+    tooltipEl.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif";
+    tooltipEl.style.border = "1px solid rgba(148, 163, 184, 0.15)";
+    tooltipEl.style.opacity = "0";
+    tooltipEl.style.transform = "translateY(-8px)";
+    tooltipEl.style.transition = "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)";
 
-    // content
+    // Header with icon and badge
+    const header = document.createElement("div");
+    header.style.display = "flex";
+    header.style.alignItems = "center";
+    header.style.gap = "8px";
+    header.style.marginBottom = "12px";
+    header.style.paddingBottom = "10px";
+    header.style.borderBottom = "1px solid rgba(148, 163, 184, 0.1)";
+
+    const icon = document.createElement("span");
+    icon.innerHTML = "✨";
+    icon.style.fontSize = "16px";
+    
+    const title = document.createElement("span");
+    title.textContent = "LinkGist AI";
+    title.style.fontWeight = "600";
+    title.style.fontSize = "13px";
+    title.style.color = "#94a3b8";
+    title.style.letterSpacing = "0.5px";
+    title.style.textTransform = "uppercase";
+    title.style.flex = "1";
+
+    if (isCached) {
+      const badge = document.createElement("span");
+      badge.textContent = "CACHED";
+      badge.style.fontSize = "10px";
+      badge.style.fontWeight = "700";
+      badge.style.color = "#22d3ee";
+      badge.style.background = "rgba(34, 211, 238, 0.15)";
+      badge.style.padding = "3px 8px";
+      badge.style.borderRadius = "6px";
+      badge.style.letterSpacing = "0.5px";
+      header.appendChild(badge);
+    }
+
+    header.appendChild(icon);
+    header.appendChild(title);
+    tooltipEl.appendChild(header);
+
+    // Content
     const p = document.createElement("div");
     p.textContent = text;
+    p.style.color = "#e4e4e7";
     tooltipEl.appendChild(p);
 
     // attach to body
     document.body.appendChild(tooltipEl);
 
+    // Trigger animation
+    requestAnimationFrame(() => {
+      tooltipEl.style.opacity = "1";
+      tooltipEl.style.transform = "translateY(0)";
+    });
+
     positionTooltip(mouseEvent.clientX, mouseEvent.clientY);
+    
     // Update position with mouse move while tooltip is visible
     function moveHandler(e) {
       positionTooltip(e.clientX, e.clientY);
     }
     document.addEventListener("mousemove", moveHandler);
+    
     // Remove after 8s or when link moves away
     setTimeout(() => {
       document.removeEventListener("mousemove", moveHandler);
@@ -101,34 +154,48 @@
 
   function positionTooltip(x, y) {
     if (!tooltipEl) return;
-    const margin = 12;
+    const margin = 16;
     const rect = tooltipEl.getBoundingClientRect();
     let left = x + margin;
     let top = y + margin;
+    
     // If off-screen on right
-    if (left + rect.width > window.innerWidth - 8) {
+    if (left + rect.width > window.innerWidth - 12) {
       left = x - rect.width - margin;
     }
     // If off-screen bottom
-    if (top + rect.height > window.innerHeight - 8) {
+    if (top + rect.height > window.innerHeight - 12) {
       top = y - rect.height - margin;
     }
+    // Keep on screen left
+    if (left < 12) left = 12;
+    // Keep on screen top
+    if (top < 12) top = 12;
+    
     tooltipEl.style.left = left + "px";
     tooltipEl.style.top = top + "px";
   }
 
   function removeTooltip() {
     if (tooltipEl && tooltipEl.parentNode) {
-      tooltipEl.parentNode.removeChild(tooltipEl);
+      tooltipEl.style.opacity = "0";
+      tooltipEl.style.transform = "translateY(-8px)";
+      setTimeout(() => {
+        if (tooltipEl && tooltipEl.parentNode) {
+          tooltipEl.parentNode.removeChild(tooltipEl);
+        }
+        tooltipEl = null;
+      }, 250);
+    } else {
+      tooltipEl = null;
     }
-    tooltipEl = null;
   }
 
   // Listen for background asking to show tooltip for stored summary
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "show_summary_tooltip") {
       const { summary } = message;
-      showTooltip({ clientX: window.innerWidth / 2, clientY: 80 }, summary);
+      showTooltip({ clientX: window.innerWidth / 2, clientY: 80 }, summary, false);
     } else if (message.action === "clean_html") {
       // message: { action: 'clean_html', html }
       const cleaned = cleanAndExtractText(message.html);
@@ -183,7 +250,7 @@
     return new Promise((res) => {
       try {
         chrome.runtime.sendMessage({ action: "get_tab_id_request" }, (reply) => {
-          // Our background isn't handling this — fallback query
+          // Our background isn't handling this – fallback query
           chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             res((tabs && tabs[0] && tabs[0].id) || null);
           });
@@ -196,10 +263,13 @@
     });
   }
 
-  // Minimal CSS injection for tooltip (in case user wants to override)
+  // Minimal CSS injection for tooltip animations
   const styleEl = document.createElement("style");
   styleEl.textContent = `
-.linkgist-tooltip { transition: transform 0.12s ease, opacity 0.12s ease; transform-origin: top left; opacity: 1; }
+.linkgist-tooltip { 
+  will-change: transform, opacity;
+  pointer-events: none;
+}
 `;
   document.head && document.head.appendChild(styleEl);
 })();
