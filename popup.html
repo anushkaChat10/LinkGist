@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>LinkGist AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="popup">
+    <h2>LinkGist AI</h2>
+
+    <label for="urlInput">URL to summarize</label>
+    <input id="urlInput" type="url" placeholder="https://example.com/article" />
+
+    <div class="row">
+      <button id="summarizeBtn">Summarize</button>
+      <button id="fetchFromTabBtn" title="Use current tab">Use tab</button>
+    </div>
+
+    <div id="summaryBox" class="card">
+      <h3>Summary</h3>
+      <div id="summaryText">No summary yet.</div>
+    </div>
+
+    <div class="qa-section card">
+      <h3>Ask a question</h3>
+      <input id="questionInput" type="text" placeholder="Ask something about the page..." />
+      <button id="askBtn">Ask</button>
+      <div id="answerBox"></div>
+    </div>
+
+    <div id="status" class="status"></div>
+    <div class="footer">Powered by Hugging Face • Model: bart-large-cnn / flan-t5-base</div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
