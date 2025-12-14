@@ -153,8 +153,4 @@ MIT License - see LICENSE file for details
 
 ---
 
-<div align="center">
 
-
-
-</div>
