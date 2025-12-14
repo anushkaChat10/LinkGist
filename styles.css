@@ -1,15 +1,8 @@
-/* styles.css - Modern Dark Theme for LinkGist AI */
-
-* {
-  box-sizing: border-box;
-}
-
+/* styles.css - Modern Dark Theme */
 body {
   margin: 0;
-  padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   width: 400px;
-  min-height: 500px;
   color: #e4e4e7;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   font-size: 14px;
@@ -104,12 +97,6 @@ button:active {
   transform: translateY(0);
 }
 
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
 button[title] {
   background: linear-gradient(135deg, #475569 0%, #334155 100%);
   box-shadow: 0 4px 12px rgba(71, 85, 105, 0.3);
@@ -190,11 +177,10 @@ button[title]:hover {
   border: 1px solid rgba(139, 92, 246, 0.2);
   line-height: 1.6;
   min-height: 20px;
-  display: none;
 }
 
-#answerBox:not(:empty) {
-  display: block;
+#answerBox:empty {
+  display: none;
 }
 
 .status {
@@ -206,14 +192,10 @@ button[title]:hover {
   border-radius: 8px;
   background: rgba(15, 23, 42, 0.4);
   margin-bottom: 12px;
-  transition: all 0.3s ease;
 }
 
 .status:empty {
   display: none;
-  padding: 0;
-  min-height: 0;
-  margin-bottom: 0;
 }
 
 .footer {
@@ -225,15 +207,26 @@ button[title]:hover {
   border-top: 1px solid rgba(148, 163, 184, 0.1);
 }
 
-/* Loading state animation */
-button.loading {
-  position: relative;
-  color: transparent !important;
-  pointer-events: none;
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-button.loading .btn-text {
-  opacity: 0;
+.card {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Loading state */
+button.loading {
+  position: relative;
+  color: transparent;
 }
 
 button.loading::after {
@@ -252,23 +245,5 @@ button.loading::after {
 }
 
 @keyframes spin {
-  to { 
-    transform: rotate(360deg); 
-  }
-}
-
-/* Fade in animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.card {
-  animation: fadeIn 0.3s ease;
+  to { transform: rotate(360deg); }
 }

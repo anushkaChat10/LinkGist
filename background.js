@@ -2,7 +2,7 @@
 // Service worker background script for LinkGist AI.
 // Replace <YOUR_HF_API_KEY> with your Hugging Face API key.
 
-const HF_API_KEY = "<YOUR API KEY>";
+const HF_API_KEY = "YOUR API KEY>";
 const HF_SUMMARY_MODEL = "facebook/bart-large-cnn";
 const HF_QA_MODEL = "google/flan-t5-base";
 
